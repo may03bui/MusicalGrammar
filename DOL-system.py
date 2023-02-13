@@ -1,5 +1,5 @@
 from mingus.midi import fluidsynth
-from mingus.containers import Track
+from mingus.containers import Track, NoteContainer
 
 
 def main():
@@ -18,10 +18,13 @@ def main():
 
         start = end
         end += num_new_notes
-    
+
     t = Track()
+    # t.add_notes([note for note in melody])
     for note in melody:
         t.add_notes(note)
+
+    print(t)
     fluidsynth.init("FluidR3_GM.sf2")
     fluidsynth.play_Track(t, 1, 140)
 
