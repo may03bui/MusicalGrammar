@@ -11,7 +11,6 @@ def get_transition_probs(string, alphabet):
         row[string[i + 1]] = row.get(string[i + 1]) + 1
 
     for n, row in t_probs.items():
-        print(row.items())
         t_probs[n] = {k: v / sum(row.values()) for k, v in row.items()}
 
     return t_probs
@@ -24,7 +23,6 @@ def generate_melody(starting_note, t_probs, alphabet, iters):
 
     for _ in range(iters):
         prev = melody[-1]
-        print(t_probs)
         current_note = np.random.choice(alphabet, p=[t_probs[prev][n] for n in alphabet])
         melody += current_note
         t.add_notes(current_note)
@@ -38,6 +36,7 @@ def main():
     t_probs = get_transition_probs(song, alphabet)
     track, melody = generate_melody("C", t_probs, alphabet, 15)
 
+    print(melody)
     fluidsynth.init("FluidR3_GM.sf2")
     fluidsynth.play_Track(track, 1, 160)
 

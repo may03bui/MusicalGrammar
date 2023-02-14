@@ -11,62 +11,31 @@ def generate_melody(grammar, iters):
     for _ in range(iters):
         pos = 0
         melody = ""
-        print("RESTART")
         while pos < len(prev_melody):
-            print(pos)
             for p in pred_list:
                 if prev_melody[pos:pos+len(p)] == p:
                     pred = p
                     break
-
-            melody += np.random.choice(prodns[pred][0], p=prodns[pred][1])  # KeyError if the input is bad
+            melody += np.random.choice(**prodns[pred])
             pos += len(pred)
-
         prev_melody = melody
 
     return melody
 
 
-
-def main():
-    # Our grammar
-    P = {
-        "F": (["F", "dFFD", "d-F+FD", "d+F-FD"], [0.25, 0.25, 0.25, 0.25]),
-        "FF": (["Fd+F-FD", "Fd-F+FD"], [0.5, 0.5]),
-        "F+F": (["Fd++F-FD", "Fd+++F--FD", "Fd-F++FD", "Fd--F+++FD"], [0.25, 0.25, 0.25, 0.25]),
-        "F-F": (["-Fd++F-FD", "-Fd+++F--FD", "-Fd-F++FD", "-Fd--F+++FD"], [0.25, 0.25, 0.25, 0.25]),
-        "+": (["+"], [1]),
-        "-": (["+"], [1]),
-        "D": (["+"], [1]),
-        "d": (["+"], [1])
-    }
-
-    for symbol in ["+", "-", "D", "d"]:  # Identity productions
-        P[symbol] = ([symbol], [1])
-
-    axiom = input("Enter an axiom. (X to stop.) ")
-    G = {"P": P, "A": axiom}
-
-    melody = generate_melody(G, 4)
-
-    # Parsing string...
-    scale = ["C", "D", "E", "F", "G", "A", "B"]    # Could've picked a different scale!
-    crotchet_length = 600
-    # get_track()
+def get_track(melody, scale):
     t = Track()
-
-    pitch = 0     # Current state
+    crotchet_length = 500
+    pitch = 0     # Initialise state
     duration = 1
     octave = 4
-    print(melody)
 
     for c in melody:
         match c:
             case "F":
                 n = Note(scale[pitch], channel=1, octave=octave)
-                print(n)
                 n.channel = 1
-                print(t.add_notes(n, crotchet_length * duration))
+                t.add_notes(n, crotchet_length * duration)
             case "D":
                 duration *= 2
             case "d":
@@ -82,7 +51,28 @@ def main():
                     pitch = 6
                     octave -= 1
 
-    print(t)
+    return t
+
+
+def main():
+    # Our grammar
+    P = {
+        "F": {"a": ["F", "dFFD", "d-F+FD", "d+F-FD"], "p": [0.25, 0.25, 0.25, 0.25]},
+        "FF": {"a": ["Fd+F-FD", "Fd-F+FD"], "p": [0.5, 0.5]},
+        "F+F": {"a": ["Fd++F-FD", "Fd+++F--FD", "Fd-F++FD", "Fd--F+++FD"], "p": [0.25, 0.25, 0.25, 0.25]},
+        "F-F": {"a": ["-Fd++F-FD", "-Fd+++F--FD", "-Fd-F++FD", "-Fd--F+++FD"], "p": [0.25, 0.25, 0.25, 0.25]},
+    }
+
+    for symbol in ["+", "-", "D", "d"]:  # Identity productions
+        P[symbol] = {"a": [symbol], "p": [1]}
+
+    axiom = input("Axiom: ")
+    G = {"P": P, "A": axiom}
+    melody = generate_melody(G, 4)
+    scale = ["C", "D", "E", "F", "G", "A", "B"]    # Could've picked a different scale!
+    t = get_track(melody, scale)
+
+    print("Melody string: ", melody)
     fluidsynth.init("FluidR3_GM.sf2")
     fluidsynth.play_Track(t, 1, 10)
 

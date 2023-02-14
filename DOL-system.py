@@ -1,5 +1,5 @@
 from mingus.midi import fluidsynth
-from mingus.containers import Track, NoteContainer
+from mingus.containers import Track
 
 
 def main():
