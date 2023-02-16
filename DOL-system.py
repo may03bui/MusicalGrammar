@@ -20,11 +20,10 @@ def main():
         end += num_new_notes
 
     t = Track()
-    # t.add_notes([note for note in melody])
     for note in melody:
         t.add_notes(note)
 
-    print(t)
+    print(melody)
     fluidsynth.init("FluidR3_GM.sf2")
     fluidsynth.play_Track(t, 1, 140)
 
